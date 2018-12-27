@@ -1,11 +1,45 @@
 ---
-title: "R Notebook"
+title: "Useful Title"
+author: "Your Name"
+date: "`r format(Sys.time(), '%d %B %Y')`"
 output: html_notebook
+editor_options:
+  chunk_output_type: inline
 ---
 
  
 
 ```{r}
 plot(cars)
+```
+
+```{r}
+install.packages("xtable")
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+anscombe
+```
+
+```{r}
+ansc <-
+  bind_cols(
+  anscombe %>% 
+    select(matches("x")) %>% 
+    gather(dataset, "x"),
+  anscombe %>%
+    select(matches("y")) %>% 
+    gather(key, "y")
+) %>% 
+select(-key) %>% 
+  mutate(dataset=gsub("x", "", dataset)) %>% 
+  as_tibble()
+```
+```{r}
+ansc
 ```
 
