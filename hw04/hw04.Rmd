@@ -1,0 +1,109 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+#Activity 5 - Data Manipulation Sampler but i didn't use gapminder bc i forgot until 10 minutes before due
+#Establish data with data.frame. C# creates columns.
+```{r}
+A <- data.frame(
+       c1 = c('A', 'B', 'C', 'D', 'E'),
+       c2 = c(1, 3, 2, 2, 1),
+       c3 = c(5, 3, 9, 6, 1))
+
+B <- A %>%
+  group_by(c1,c2) %>%
+  summarize(Nrows=n(),
+            SumOfCol=sum(c2 + c3))
+
+```
+
+```{r}
+A
+```
+
+```{r}
+B
+```
+#Creating a table without reshape2
+```{r}
+C <-with(A, table(c1, c2))
+C
+```
+#using reshape2 to make a dataframe
+```{r}
+C_alt<-dcast(A, c1~c3,value.var="c2",fun.aggregate=length)
+C_alt
+```
+```{r}
+library(reshape2)
+```
+###oH THANK GOODNESS I FINALLY GOT IT TO UPLOAD
+###STILL NO EXPLANATION ON KABLE
+
+#Reformatting a table
+```{r}
+D <- melt(C, id="c1") %>% 
+  arrange(c1)
+D
+```
+
+#use merge to combine two tables
+```{r}
+E <- data.frame(
+  c1 = c("A", "B", "C"),
+  c2 = c(1, 2, 5)
+)
+
+F <- data.frame(
+  c1 = c("A", "B", "B", "B", "C", "A"),
+  c3 = c("a", "a", "a", "b", "c", "b")
+)
+
+G <-merge(F,E)
+```
+```{r}
+E
+
+F
+
+G
+```
+
+#Filter creates a subset of the data
+```{r}
+H <- filter(G, c1=="A")
+H
+```
+
+#Use transpose to re-organize the data
+```{r}
+H_transpose <- data.frame(t(H))
+H_transpose
+```
+
+```{r}
+a_arranged <- arrange(A,c1,c2,c3)
+a_arranged
+```
+
+#Joining
+
+```{r}
+gapminder
+mtcars
+merge(gapminder, mtcars)
+```
+
+```{r}
+Wowee <- merge(gapminder, mtcars)
+Wowee
+filter(Wowee, gear==4, year==1952)
+filter(Wowee, continent=="Asia", lifeExp>45, year>2000)
+```
+
+```{r}
+match("Continent", gapminder)
+```
+
+I have a very bad headache now.
+
