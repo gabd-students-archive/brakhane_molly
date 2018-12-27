@@ -1,0 +1,84 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+Molly Brakhane
+HW03
+
+
+
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+anscombe
+```
+
+```{r}
+ansc <-
+  bind_cols(
+    anscombe %>% 
+      select(matches("x")) %>% 
+      gather(set, "x"),
+    anscombe %>% 
+      select(matches("y")) %>% 
+      gather(key, "y")
+    ) %>% 
+  select(-key) %>% 
+  mutate(set = gsub("x", "", set)) %>% 
+  as_tibble()
+```
+
+```{r}
+ansc
+```
+
+```{r}
+ansc %>% 
+  group_by(set) %>% 
+  summarize(
+    mean_x = mean(x),
+    stdev_x = sd(x),
+    mean_y = mean(y),
+    stdev_y = sd(y),
+  )
+```
+
+```{r}
+ansc %>% ggplot(aes(x, y, color = set)) +
+  geom_point() +
+  facet_wrap(~set, ncol = 2)
+```
+
+```{r}
+library(tidyverse)
+library(datasaurus)
+
+datasaurus_dozen %>% 
+  group_by(dataset) %>% 
+  smmarize(avg_x = mean(x),
+           stdev_x = sd(x),
+           avg_y = mean(y)
+           stdev_y = sd(y))
+
+ggplot(datasaurus_dozen, aes(x, y, color = dataset)) +
+  geom_point() +
+  facet_wrap(~dadtaset, ncol=3)
+```
+
