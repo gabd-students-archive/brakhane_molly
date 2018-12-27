@@ -59,7 +59,7 @@ ansc %>% ggplot(aes(x, y, color = dataset)) +
   geom_point() +
   facet_wrap(~dataset, ncol = 2)
 ```
-#part 2
+# Part 2
 
 ```{r}
 library(xtable)
@@ -121,7 +121,9 @@ xtable(girth_lm) %>% kable()
 
 $e = mc^2$
 $$\frac{\Delta N}{\Delta t} = rn\left(\frac{K-N}{K}\right).$$
-$$V^0 = \frac{V^m[S]}{(K^m + [S])}$$
+$$V_0 = \frac{V_{max}[S]}{(K_m + [S])}$$
 
 $$\chi^2 = \frac{(O-E)^2}{E}$$
+$$p_2 + \rho\frac{V_2^2}{2} = p_1 + \rho\frac{V_1^2}{2}$$
 
+^[here is footnote]
