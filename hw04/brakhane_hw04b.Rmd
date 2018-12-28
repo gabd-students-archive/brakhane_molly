@@ -1,0 +1,89 @@
+---
+title: "HW04 Part 2: Graph some biological data"
+author: "Molly Brakhane"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+library(tidyverse)
+```
+
+# Plot 1
+```{r}
+data(trees)
+```
+```{r}
+?trees
+```
+
+```{r}
+ggplot(data = trees) +
+  geom_point(mapping = aes(x = Height, y = Girth))
+```
+
+There is positive trend in girth and height, meaning they increase together.
+
+# Plot 2
+```{r}
+year <- 1821:1934
+```
+```{r}
+data(lynx)
+?lynx
+class(lynx)
+pelts <- as.vector(lynx)
+```
+```{r}
+lynx_pelts <- data.frame(year, pelts)
+ggplot(data = lynx_pelts)+
+  geom_line(mapping = aes(x = year, y = pelts, color = "maroon"))
+```
+Whenever there is a lot of pelts, it decreases after until the population grows again. Then the number of pelts goes back up,
+# Plot 3
+```{r}
+data(iris)
+?iris
+```
+```{r}
+ggplot(data = iris) +
+  geom_point(mapping = aes(x = Petal.Length, y = Petal.Width, color = Species, shape = Species), size = 2) +
+  labs(x = "Petal Length", y = "Petal Width")
+```
+Virginica is the largest, and the versicolor is second. The smallest is setosa.
+# Plot 4 & 5
+```{r}
+?geom_violin
+?msleep
+ggplot(data = msleep, mapping = aes(x = vore, y = sleep_rem)) +
+  geom_violin(fill = "gray70")
+```
+Carnivores have very little REM sleep. Insects have more. Most herbivores also get very litte. Gray 30 is much darker than gray 70.
+# Plot 7
+```{r}
+ggplot(data = msleep) +
+  geom_boxplot(mapping = aes(x = order, y = sleep_total)) +
+  coord_flip()
+```
+
+# Plot 8
+```{r}
+ggplot(data = msleep, mapping = aes(x = conservation, y = awake, color = conservation)) +
+  geom_boxplot()+
+  geom_point() +
+  geom_jitter() +
+  coord_flip() +
+  labs(x = "Awake", y = "Conservation", color = "Conservation")
+```
+
+# Plot 9 & 10
+```{r}
+ggplot(data = msleep) +
+  geom_point(mapping = aes(x = awake, y = bodywt, color = vore))
+ggplot(data = msleep)+
+  geom_point(mapping = aes(x = awake, y = brainwt, color = conservation)) +
+  facet_wrap(.~vore, ncol = 2) 
+```
+Herbivores are awake more than other animals. Animas with more brain wight also sem to stay awake longer than other animals.Herbivores are larger in general.
