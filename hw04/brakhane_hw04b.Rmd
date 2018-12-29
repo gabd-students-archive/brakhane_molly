@@ -67,7 +67,7 @@ ggplot(data = msleep) +
   geom_boxplot(mapping = aes(x = order, y = sleep_total)) +
   coord_flip()
 ```
-
+Coord flip switches the x and y to make a more useful table.
 # Plot 8
 ```{r}
 ggplot(data = msleep, mapping = aes(x = conservation, y = awake, color = conservation)) +
