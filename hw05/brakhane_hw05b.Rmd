@@ -7,16 +7,128 @@ editor_options:
   chunk_output_type: inline
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
-
 ```{r}
-plot(cars)
+library(tidyverse)
+library(ggplot2)
+```
+# Limpets
+```{r}
+limpet <- read.csv("data/limpets.csv")
+limpet 
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+```{r}
+limpet$Site <- factor(limpet$Site, levels = c("PBL", "KNRM", "VBG", "WP", "PF", "DP", "SIO", "CTZ1", "CTZ2", "CNM"))
+ggplot(data = limpet) +
+  geom_boxplot(mapping = aes(x = Site, y = Length, color = Protected)) +
+  labs(y = "Length (mm)")
+```
+Unprotected sites generally result in smaller limpet samples, with some outliers in WP and DP. Those that are protected are reliably larger.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+# Roseate Terns
+```{r}
+roseate <- read.delim("data/roseate_terns.txt")
+roseate_tidy <- roseate %>% 
+  gather(`AR`, `AL`, `AC`, `BR`, `BL`, `BC`, `JR`, `JL`, `JC`, key = "Site", value = "Population")
+roseate_tidy
+filter(roseate_tidy, is.na(Population) == FALSE)
+ggplot(data = roseate_tidy) +
+  geom_line(mapping = aes(x = year, y = Population)) +
+  facet_wrap(~Site, nrow = 3) +
+  labs(x = "Year", y = "Population")
+```
+AL, AR, JL, and BL all obviously increased between 1992 and 2016, and JR and BR obviously decreased. Gaps in the population are results of a lack of populaation samples.
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+# Darters
+```{r}
+?read.fwf
+start_pos <- c(1, 4, 15, 16, 17, 18, 21, 25, 29, 33, 36, 39, 40)
+stop_pos <- c(3, 14, 15, 16, 17, 20, 24, 28, 32, 35, 38, 40, 41)
+names <- c("Specimen ID", "Species", "Riffle", "Age", "Sex", "Length", "Depth", "Velocity", "Temperature", "MajSub", "MinSub", "MajType", "MinType")
+darters <- read.fwf("data/darter.txt", skip = 15, widths = c(3, 11, 1, 1, 1, 3, 4, 3, 3, 2, 2, 1, 1),, col.names = names)
+darters
+```
+
+```{r}
+darter_riffle <- darters$riffle <- factor(darters$Riffle, ordered = FALSE, levels = c("1", "2"))
+darters_majtype <- darters$majtype <- factor(darters$MajType, ordered = TRUE, levels = c( "s", "fg", "sg", "lg", "c"))
+```
+## Pipe Function
+```{r}
+f_darters <- darters %>% 
+  filter(!Species %in% c("zonale", "tetrazonum")) %>% 
+  select(-c(MinType, MinSub)) %>% 
+  rename(Major_Type = MajType) %>% 
+  rename(Major_Substrate = MajSub) %>% 
+  arrange(Specimen.ID)
+
+f_darters
+```
+
+## Plot 1
+```{r}
+ggplot(data = f_darters) +
+  geom_point(mapping = aes(x = Length, y = Depth, color = Species, shape = Species)) +
+  facet_wrap(.~Riffle, nrow = 3)
+```
+Caeruleum have the largest variance in Riffle 1, but Blennioides seem more suited to Riffle 2. In fact Blennioides grow almost twice as long in the second Riffle.
+## Plot 2
+```{r}
+ggplot(data = f_darters) +
+  geom_boxplot(mapping = aes(y = Length, x = Species)) +
+  facet_wrap(~Riffle, nrow = 2)
+```
+Spectabile grow much much smaller in Riffle 2, whereas the three Blenioides I noticed in the previous graph are large outliers, so the Blenioides only grow slightly larger in riffle 2. Caeruleum grow significantly smaller in riffle 2 as well.
+## Plot 3
+```{r}
+ggplot(data = f_darters) +
+  geom_boxplot(mapping = aes(y = Length, x = Major_Substrate)) +
+  facet_grid(Species~Riffle, nrow(3))
+```
+```{r}
+ggplot(data = f_darters) +
+  geom_boxplot(mapping = aes(y = Length, x = Major_Substrate)) +
+  facet_grid(Riffle~Species, nrow(3))
+```
+This is a much easier to read graph than the one above. Spectabile show no major substrate preference in Riffle 2, while Blennioides and caeruleum show opposing changes in preference: where Blennoides move shallower, the caeruleum move deeper. It would appear shallower substrate is more beneficial for growth, as the shallower riffle shows longer individuals.
+# Blacklip Abalone
+## Chunk 1
+```{r}
+abalone <- read.csv("data/abalone.csv")
+abalone
+abalone1 <- select(abalone, -c(X))
+ggplot(data = abalone1) +
+  geom_boxplot(mapping = aes(x = Type, y = Height))
+```
+Immature are slightly smaller than the other two, but there is a significant outlier in the females.
+## Chunk 2
+```{r}
+ggplot(data = abalone1) +
+  geom_point(mapping = aes(x = Rings, y = Height))
+```
+No, they are not old. they are in fact younger than a lot of samples.
+## Chunk 3
+```{r}
+abalone2 <- filter(abalone1, Height < 0.3)
+abalone2$Type <- factor(abalone2$Type, ordered = TRUE, levels = c("I", "F", "M"))
+ggplot(data = abalone2) +
+  geom_point(mapping = aes(x = Rings, y = Height, color = Type))
+```
+There are some immatures that measure at a 0 height. Males and females appear equally spread out, thought there are some very small females and one small male. Most seem to become matture around 8 rings.
+## Chunk 4
+```{r}
+abalone_I <- filter(abalone2, Height == 0)
+abalone_I
+is.na(abalone2) <- !abalone2
+ggplot(data = abalone2) +
+  geom_point(mapping = aes(x = Rings, y = Height, color = Type))
+```
+Again, most samples are mature after 8 rings. There are some immatures that have many rings and a large size though.
+## Chunk 5
+```{r}
+ggplot(data = abalone2) +
+  geom_point(mapping = aes(x = ShellWeight, y = LongestShell, color = Type))
+ggplot(data = abalone2) +
+  geom_point(mapping = aes(x = Rings, y = ShellWeight, color = Type))
+```
+Females seem to have very heavy shells, and there is a definite relatioship between rings and shell weight, and an even more significant relationship between shell weight and the largest shells, to no one's surprise.
