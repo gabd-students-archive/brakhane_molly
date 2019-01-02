@@ -11,16 +11,173 @@ editor_options:
 library(tidyverse)
 install.packages("GGally")
 install.packages("devtools")
+```
+```{r}
+library(patchwork)
+library(GGally)
+```
 
+# Part 1
+## Import and Wrangle
+```{r}
+sparrows
+sparrows_a <- sparrows %>% 
+  mutate(box_group = "Sparrows",
+         row_order = 1:nrow(.))
+sparrows_a
+```
+## Figure 2: Outliers
+```{r}
+plot_box <- sparrows_a %>% 
+  ggplot(aes(x = box_group,
+             y = wingcrd)) +
+  geom_boxplot(width = 0.25) +
+  labs(x = NULL,
+       y = "Wing length (mm)"
+       )
+```
+```{r}
+plot_cleveland <- sparrows_a %>% 
+  ggplot(aes(x = wingcrd,
+             y = row_order)) +
+  geom_point() +
+  labs(x = "Wing length (mm)",
+       y = "Order of the Data")
+```
+```{r}
+plot_cleveland + plot_box
+
+```
+```{r}
+plot_box + plot_cleveland + coord_flip()
+
+```
+
+## Figure 3: outliers
+```{r}
+p_culmen <- sparrows_a %>% 
+  ggplot(aes(y = row_order)) +
+  geom_point(aes(x = culmen)) +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+p_culmen
+p_nalospi <- sparrows_a %>% 
+  ggplot(aes(y = row_order)) +
+  geom_point(aes(x = nalospi)) +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+p_wt <-sparrows_a %>% 
+  ggplot(aes(y = row_order)) +
+  geom_line(aes(x = wt)) +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+p_wingcrd <- sparrows_a %>% 
+  ggplot(aes(y = row_order)) +
+  geom_point(aes(x = wingcrd)) +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+p_tarsus <-  sparrows_a %>% 
+  ggplot(aes(y = row_order)) +
+  geom_point(aes(x = tarsus)) +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+p_head <- sparrows_a %>% 
+  ggplot(aes(y = row_order)) +
+  geom_point(aes(x = head)) +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+```
+```{r}
+p_culmen + p_nalospi + p_wt + p_wingcrd + p_tarsus + p_head
+```
+Head, Tarsus, and Nalopsi have outlier data.
+
+
+## Figure 5: Distribution
+```{r}
+h1 <- sparrows_a %>% 
+  filter(Month %in% 6:8) %>% 
+  ggplot() +
+  geom_histogram(aes(x = wt),
+                 binwidth = 0.5,
+                 boundary = 0,
+                 closed = "right",
+                 color = "black") +
+  scale_x_continuous(breaks = seq(14, 28, by = 2))
+h2 <- sparrows_a %>% 
+  filter(Month %in% 6:8) %>% 
+  mutate(Month = case_when(
+    Month == 6 ~ "June",
+    Month == 7 ~ "July",
+    Month == 8 ~ "August")) %>% 
+  ggplot() +
+  geom_histogram(aes(x=wt),
+                 binwidth = 0.5,
+                 boundary = 0,
+                 color = "black") +
+  scale_x_continuous(breaks = seq(14, 28, by = 2)) +
+  facet_wrap(~ Month, ncol = 1)
+```
+```{r}
+h1 + h2
+```
+## Grad and Honors
+```{r}
+h1 <- sparrows_a %>% 
+  filter(Month %in% 6:8) %>% 
+  ggplot() +
+  geom_density(aes(x = wt)) +
+  scale_x_continuous(breaks = seq(14, 28, by = 2))
+h2 <- sparrows_a %>% 
+  filter(Month %in% 6:8) %>% 
+  mutate(Month = case_when(
+    Month == 6 ~ "June",
+    Month == 7 ~ "July",
+    Month == 8 ~ "August")) %>% 
+  ggplot() +
+  geom_density(aes(x = wt, fill = Month)) +
+  scale_x_continuous(breaks = seq(14, 28, by = 2))
+```
+```{r}
+h1 + h2
+```
+
+## Figure 10: Relationships
+```{r}
+sparrows_a %>% ggscatmat(columns = 1:7)
+```
+THATS CRAZY
+
+## Figure 11: Interactions
+```{r}
+month_order = c("May", "June", "July", "August", "September")
+sparrows_a %>% 
+  filter(Month %in% 5:9,
+         Sex !=0) %>% 
+  mutate(Month = case_when(
+    Month == 5 ~ "May",
+    Month == 6 ~ "June",
+    Month == 7 ~ "July",
+    Month == 8 ~ "August",
+    Month == 9 ~ "Septermber"),
+    Month = factor(Month, levels = month_order, ordered = TRUE),
+    Sex = ifelse(Sex == 4, "Male", "Female")) %>% 
+  ggplot(aes(x = wingcrd,
+             y = wt)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_grid(Sex ~ Month)
 ```
 
 
 
-
-
-
-
-
+# Part 2 :; Aegla Crabs
 
 
 
