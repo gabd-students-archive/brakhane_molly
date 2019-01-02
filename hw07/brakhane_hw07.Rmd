@@ -179,7 +179,87 @@ sparrows_a %>%
 
 # Part 2 :; Aegla Crabs
 
+```{r}
+aegla_crabs_raw
+```
+```{r}
+aegla_crabs <- aegla_crabs_raw %>% 
+  select(-c("Site", "AT", "WT", "Shrimp", "Aeglam", "AeglaFe", "AeglaFo")) %>% 
+  drop_na(c("N")) %>% 
+  mutate(row_order = 1:nrow(.))
+aegla_crabs
+```
+## Cleveland Plots
+```{r}
+c1 <- ggplot(data = aegla_crabs, aes(y = row_order)) +
+  geom_point(aes(x = Width)) +
+  labs(y = "Order of Data")
+c2 <- ggplot(data = aegla_crabs) +
+  geom_point(aes(x = Flow, y = row_order)) +
+  labs(y = "Order of Data")
+c3 <- ggplot(data = aegla_crabs) +
+  geom_point(aes(x = Cond, y = row_order)) +
+  labs(y = "Order of Data")
+c4 <- ggplot(data = aegla_crabs) +
+  geom_point(aes(x = pH, y = row_order)) +
+  labs(y = "Order of Data")
+c1 + c2 + c3 + c4
+```
 
+## Histograms
+```{r}
+h1 <- ggplot(data = aegla_crabs) +
+  geom_histogram(aes(x = pH),
+                 binwidth = .05,
+                 boundary = 0,
+                 closed = "left",
+                 color = "black")
+h1
+```
+```{r}
+h2 <-  ggplot(data = aegla_crabs) +
+  geom_histogram(aes(x = Crab),
+                 binwidth = 1,
+                 boundary = 0,
+                 closed = "left",
+                 color = "black")
+h2
+```
+```{r}
+h3 <-  ggplot(data = aegla_crabs) +
+  geom_histogram(aes(x = Depth),
+                 binwidth = .5,
+                 boundary = 1,
+                 closed = "left",
+                 color = "black")
+h3
+```
+## Density Plots
+```{r}
+d1 <- ggplot(data = aegla_crabs) +
+  geom_density( aes(x = pH))
+d1
+```
+```{r}
+d2 <- ggplot(data = aegla_crabs) +
+  geom_density( aes(x = Crab))
+d2
+```
+```{r}
+d3 <- ggplot(data = aegla_crabs) +
+  geom_density( aes(x = Depth))
+d3
+```
+## Patchwork
+```{r}
+h1 + d1 + h2 + d2 + h3 + d3 + plot_layout(ncol = 2, nrow = 3)
+```
+
+
+## GGPpairs
+```{r}
+aegla_crabs %>% ggpairs(columns = 1:13)
+```
 
 
 
