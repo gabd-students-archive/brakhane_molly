@@ -77,7 +77,7 @@ ggplot(data = darters_c) +
   geom = "point",
   size = 3, 
   shape = 15, 
-  fill = "maroon") +
+  color = "maroon") +
   geom_point(mapping = aes(x = Species, y = Length), color = "gray70") +
   stat_summary(
     mapping = aes(x = Species, y = Length),
@@ -85,28 +85,111 @@ ggplot(data = darters_c) +
     geom = "point",
     size = 2.2) +
   facet_wrap(~Riffle, nrow = 2) +
-  labs(y = "Length(mm)", x = NULL) 
-?coord_flip
+  labs(y = "Length(mm)", x = NULL) +
+  coord_flip()
 ```
-THis makes the means much more obvious even if they aren't maroon or 15? Why is it ignoring all of those instructions?? Tried rearranging and no dice.
+The average is odd compared to the data sets. I must have messed up but I don't know how. D:
 
 
 # Stress and Corticosterones in Birds
+## Import Data
 ```{r}
 library(tidyverse)
 library(smatr)
-names <-  c("capture_date", "day", "site", "urban_score", "cortf", "cortB", "sex", "smi", "tarsus", "mass", "basal_cort", "stress_cort")
-feathers <- read.csv("data/feathers.csv")+
-  locale = locale(decimal_mark = ",")+
-  skip = 1 +
-  colnames = names)
-feat
+library(dplyr)
+feathers
+```
+/crying
+```{r}
+feathers_a <- rename(feathers, c("ï..Capture.Date" = "capture_date", "Date" = "day", "Site" = "site", "Urba.Score" = "urban_score", "CortF.ng.mg" = "cortf", "CortF.ng.mm" = "cortB", "Sex" = "sex", "SMI" = "smi", "Tarsus" = "tarsus", "Mass" = "mass", "Bas_Cort" = "basal_cort", "Stress_Cort" = "stress_cort"))
+feathers_a
+```
+## Wrangle Data
+```{r}
+mean_tarsus <- mean(feathers_a$tarsus)
 
+```
+```{r}
+feathers_b <-  mutate(feathers_a, log_mass = log(mass), log_tarsus = log(tarsus))
+```
 
-
+```{r}
+?sma
+major_axis <- sma(log_mass~log_tarsus, data = feathers_b)
+summary(major_axis)
+coef(major_axis)
+```
+```{r}
+feathers_smi<- feathers_a %>% 
+  mutate(
+    new_smi = mass * (mean_tarsus/tarsus)^1.86)
+feathers_smi %>% 
+  select(smi, new_smi)
+feathers_smi
+```
+ 
+## Summarize Data
+```{r}
+summary_feathers <- feathers_smi %>% 
+  group_by(site) %>% 
+  summarize(average_basal = mean(basal_cort, na.rm = TRUE),
+            se_basal = sd(basal_cort, na.rm = TRUE) / sqrt(NROW(feathers_smi)))
+summary_feathers
 
 ```
 
+## Graph Data
+*Plot 1*
+```{r}
+ggplot(data = feathers_smi) +
+  geom_boxplot(mapping = aes(x = site, y = new_smi))
+```
 
+*Plot 2*
+```{r}
+?geom_errorbar()
+edit_summary <- summary_feathers %>% 
+ mutate(ymin = average_basal - se_basal,
+        ymax = average_basal + se_basal) 
+```
+```{R}
+ggplot() +
+  geom_point(data = feathers_smi, aes(x = site, y = basal_cort)) +
+  geom_errorbar(data = edit_summary, aes(x = site, ymin = ymin, ymax = ymax))
+```
+ 
+*Plot 3*
+```{r}
+stress_summary <- feathers_smi %>% 
+  group_by(site) %>% 
+  mutate(
+    avg_stress = mean(stress_cort, na.rm = TRUE),
+    se_cort = sd(stress_cort, na.rm = TRUE)/sqrt(NROW(feathers_smi)),
+    ymin = avg_stress - se_cort,
+    ymax = avg_stress + se_cort)
+ggplot() +
+  geom_point(data = feathers_smi, aes(x = site, y = stress_cort)) +
+  geom_linerange(data = stress_summary, aes(x = site, ymin = ymin, ymax = ymax))
+```
 
+## Graduate and Honors Students
+
+```{r}
+ggplot() +
+  geom_point(data = feathers_smi, aes(x = site, y = stress_cort)) +
+  stat_summary(data = feathers_smi,
+    mapping = aes(x = site, y = stress_cort),
+    fun.y = median,
+    geom = "point",
+    size = 3,
+    color = "maroon")
+  geom_linerange(data = stress_summary, aes(x = site, ymin = ymin, ymax = ymax)) 
+  
+```
+
+```{r}
+ggplot() +
+  geom_point(data = feathers_smi, aes(x = site, y = basal_cort)) +
+  geom_errorbar(data = edit_summary, aes(x = site, ymin = ymin, ymax = ymax), size = 0.3)
+```
 
