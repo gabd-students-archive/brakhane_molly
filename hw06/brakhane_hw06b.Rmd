@@ -1,0 +1,112 @@
+---
+title: "HW 06 Part 2: Wrangling II"
+author: "Molly Brakhane"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+library(tidyverse)
+library(knitr)
+install.packages("smatr")
+library(smatr)
+```
+
+
+# Darters in Riffles
+```{r}
+read.delim("data/darter.txt")
+```
+
+
+
+```{r}
+start_pos <- c(1, 4, 15, 16, 17, 18, 21, 25, 29, 33, 36, 39, 40)
+stop_pos <- c(3, 14, 15, 16, 17, 20, 24, 28, 32, 35, 38, 40, 41)
+names <- c("Specimen ID", "Species", "Riffle", "Age", "Sex", "Length", "Depth", "Velocity", "Temperature", "MajSub", "MinSub", "MajType", "MinType")
+darters <- read.fwf("data/darter.txt", skip = 15, widths = c(3, 11, 1, 1, 1, 3, 4, 3, 3, 2, 2, 1, 1),, col.names = names)
+darters
+```
+## Wrangle Data
+```{r}
+ 
+darters_b <- filter(darters, !Species %in% c("tetrazonum", "zonale"))
+darters_c <- mutate(darters_b,
+  total_substrate = MajSub + MinSub,
+         Length = Length * 100,
+         Riffle = recode(Riffle, "1" = "Riffle 1", "2" = "Riffle 2"),
+         Sex = recode(Sex, "m" = "Male", "f" = "Female"),
+  )
+darters_c
+```
+## Summarize Data
+```{r}
+summary_darter <- darters_c %>% 
+  group_by(Riffle, Species) %>% 
+  summarise(average_length = mean(Length),
+            average_depth = mean(Depth),
+            average_velocity = mean(Velocity))
+summary_darter
+```
+## Table Results
+```{r}
+ggplot(data = summary_darter) +
+  geom_point(mapping = aes(x = average_velocity, y = average_depth, size = average_length, color = Species)) +
+  facet_wrap(~Riffle, nrow = 2)
+```
+
+## Plot 1
+```{r}
+ggplot(data = darters_c) +
+  stat_summary(mapping = aes(x = Species, y = Length)) +
+  geom_point(data = summary_darter, 
+             mapping = aes(x = Species, y = average_length), shape = 22, fill = "black")+
+  coord_flip() +
+  facet_wrap(~Riffle, nrow = 2) +
+  labs(y = "Length(mm)", x = NULL)
+```
+Riffle 2 has a much larger distribution of sizes than Riffle 1.
+## Plot 2
+```{r}
+ggplot(data = darters_c) +
+  stat_summary(data = summary_darter,
+  mapping = aes(x = Species, y = average_length), 
+  fun.y = mean,
+  geom = "point",
+  size = 3, 
+  shape = 15, 
+  fill = "maroon") +
+  geom_point(mapping = aes(x = Species, y = Length), color = "gray70") +
+  stat_summary(
+    mapping = aes(x = Species, y = Length),
+    fun.y = median,
+    geom = "point",
+    size = 2.2) +
+  facet_wrap(~Riffle, nrow = 2) +
+  labs(y = "Length(mm)", x = NULL) 
+?coord_flip
+```
+THis makes the means much more obvious even if they aren't maroon or 15? Why is it ignoring all of those instructions?? Tried rearranging and no dice.
+
+
+# Stress and Corticosterones in Birds
+```{r}
+library(tidyverse)
+library(smatr)
+names <-  c("capture_date", "day", "site", "urban_score", "cortf", "cortB", "sex", "smi", "tarsus", "mass", "basal_cort", "stress_cort")
+feathers <- read.csv("data/feathers.csv")+
+  locale = locale(decimal_mark = ",")+
+  skip = 1 +
+  colnames = names)
+feat
+
+
+
+
+```
+
+
+
+
