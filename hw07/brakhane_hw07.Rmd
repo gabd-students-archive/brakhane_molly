@@ -1,0 +1,32 @@
+---
+title: "HW 07: Data Visualisation"
+author: "Molly Brakhane"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+#Installation
+```{r}
+library(tidyverse)
+install.packages("GGally")
+install.packages("devtools")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
