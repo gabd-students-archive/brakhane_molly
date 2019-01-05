@@ -10,9 +10,13 @@ editor_options:
 ```{r}
 library(tidyverse)
 library(lubridate)
-locale = "English"
+library(ggplot2)
+
 ```
+
+
 # Part 1: Play Date
+
 ```{r}
 birth_date <- "July 8, 1997"
 anderson <- "9 June 1836"
@@ -25,7 +29,9 @@ mcclintock <- "16061902"
 mlk_birth <- "1/15/29"
 mlk_dream <- "1963 August 08"
 ```
+
 ### Convert each date to POSIXct format, using lubridate functions, saving each of them to a unique variable. Print each result.
+
 ```{r}
 birth_date <- mdy("July 8, 1997")
 anderson <- dmy("9 June 1836")
@@ -125,20 +131,21 @@ names(birth_vector) <- c("Brakhane", "Anderson", "Anning", "Ball", "Earle", "Fra
 ```{r}
 leaps <- leap_year(birth_vector)
 leaps
+year(birth_vector[leaps])
+
 ```
 
 
 
 ### 2. Subtract each birthdate in the vector from your own to calculate the number of days that have passed between their birth dates and yours. Sort from the greatest number to fewest. You should listed last.
 
-
-
-
-
-
-
-
-
+```{r}
+days_passed_a <- time_length(birth_vector - brakhane_dttm, "day")
+sort(days_passed_a, decreasing = FALSE)
+#JUST TO CHECK:
+days_passed_b <- interval(ymd(mcclintock_dttm), ymd(brakhane_dttm))
+time_length(days_passed_b, "day")
+```
 
 
 
