@@ -6,22 +6,130 @@ output: html_notebook
 editor_options: 
   chunk_output_type: inline
 ---
-
+# Installation
 ```{r}
 library(tidyverse)
 library(lubridate)
+locale = "English"
+```
+# Part 1: Play Date
+```{r}
+birth_date <- "July 8, 1997"
+anderson <- "9 June 1836"
+anning <- "1799/05/21"
+ball <- "July 24, 1892"
+earle <- "August, 30 (1935)"
+franklin <- "25th of July, 1920"
+lederberg <- "December 18, 1922"
+mcclintock <- "16061902"
+mlk_birth <- "1/15/29"
+mlk_dream <- "1963 August 08"
+```
+### Convert each date to POSIXct format, using lubridate functions, saving each of them to a unique variable. Print each result.
+```{r}
+birth_date <- mdy("July 8, 1997")
+anderson <- dmy("9 June 1836")
+anning <- ymd("1799/05/21")
+ball <- mdy("July 24, 1892")
+earle <- mdy("August, 30 (1935)")
+franklin <- dmy("25th of July, 1920")
+lederberg <- mdy("December 18, 1922")
+mcclintock <- dmy("16061902")
+mlk_birth <- mdy("1/15/29")
+mlk_dream <- ymd("1963 August 08")
+
+anderson_dttm <- as_datetime(anderson)
+anning_dttm <- as_datetime(anning)
+ball_dttm <- as_datetime(ball)
+brakhane_dttm <- as_datetime(birth_date)
+earle_dttm <- as_datetime(earle)
+franklin_dttm <- as_datetime(franklin)
+lederberg_dttm <- as_datetime(lederberg)
+mcclintock_dttm <- as_datetime(mcclintock)
+mlk_birth_dttm <- as_datetime(mlk_birth)
+mlk_dream_dttm <- as_datetime(mlk_dream)
+
+anderson_dttm
+anning_dttm
+ball_dttm
+brakhane_dttm
+earle_dttm
+franklin_dttm
+lederberg_dttm
+mcclintock_dttm
+mlk_birth_dttm
+mlk_dream_dttm
+
+```
+
+### Check your dates to be sure they are correct. If you spot any errors, correct them now using the proper lubridate functions.
+
+```{r}
+mlk_dream_dttm_1 <- update(mlk_dream_dttm, year = 1963, month = 8, day = 28)
+mlk_birth_dttm_1 <- update(mlk_birth_dttm, year = 1929, month = 1, day = 15)
+```
+
+### What day of the week were you born on? Show the full day name, not the abbreviated name or the day number.
+
+```{r}
+wday(brakhane_dttm, label = TRUE, abbr = FALSE)
+```
+
+### what day of the week would your birthday be on *this* year? Use lubridate's **update** function. You can hard code this year by you must figure out how to do it entirely by code for full points. In other words, your code should work just as well next year or five years in the future without editing.
+
+```{r}
+now <- now()
+year <- year(now)
+year
+new_brakhane <- update(brakhane_dttm, year = year)
+new_brakhane
+wday(new_brakhane, label = TRUE, abbr = FALSE)
+```
+
+### What day of the week would your birthday be on in the Year 2525, if Man is still alive? How old would you be? You may hard code 2525. Show the abbreviated day of the week.
+ 
+```{r}
+future_brakhane <- update(brakhane_dttm, year = 2525, month = 7, day = 8)
+wday(future_brakhane, label = TRUE, abbr = TRUE)
+future_brakhane
+brakhane_dttm
+future_age <- interval(ymd(brakhane_dttm), ymd(future_brakhane))
+time_length(future_age, "year")
+```
+
+### How many days was it between the birth of Dr. Elizabeth Garett Anderson and Alice Augusta Ball?
+
+```{r}
+days_between <- interval(ymd(anderson_dttm), ymd(ball_dttm))
+days_between
+time_length(days_between, unit = "day")
+```
+
+### What is the duration between MLK's birth date and his *I Had a Dream* speech?
+
+```{r}
+mlk <- interval(ymd(mlk_birth_dttm_1), ymd(mlk_dream_dttm_1))
+mlk
+time_length(mlk, "year")
+```
+
+## Enter the eight dttm dates into a vector, including your own, in the order they are given above. Name each element of the vector with the last name of each person.
+
+```{r}
+birth_vector <- c(brakhane_dttm, anderson_dttm, anning_dttm, ball_dttm, earle_dttm, franklin_dttm, lederberg_dttm, mcclintock_dttm, mlk_birth_dttm_1)
+names(birth_vector) <- c("Brakhane", "Anderson", "Anning", "Ball", "Earle", "Franklin", "Lederberg", "McClintock", "King")
+```
+
+### 1. Of the birthdates, which of them are leap years? Start with POSIXct dates, display only the final years of the leap years, not the date. This should be three=four years.
+
+```{r}
+leaps <- leap_year(birth_vector)
+leaps
 ```
 
 
 
-
-
-
-
-
-
-
-
+### 2. Subtract each birthdate in the vector from your own to calculate the number of days that have passed between their birth dates and yours. Sort from the greatest number to fewest. You should listed last.
 
 
 
