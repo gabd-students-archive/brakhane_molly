@@ -148,13 +148,78 @@ time_length(days_passed_b, "day")
 ```
 
 
+# Part 2
+
+## Lake Ice
+### Import lake_ice.csv
+```{r}
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(readr)
+lake_ice <- read_csv("Data/lake_ice.csv")
+lake_ice
+```
+
+### Filter the data to save only Lake Mendota.
+```{r}
+lake_mendota <- filter(lake_ice, lakename == "LAKE MENDOTA")
+lake_mendota
+```
+
+### Select the columns (iceon_year, iceon_month, iceon_day, iceoff_year, iceoff_month, iceoff_day)
+
+```{r}
+select(lake_mendota, iceon_year, iceon_month, iceon_day, iceoff_year, iceoff_month, iceoff_day)
+```
+
+
+
+### Use lubridate to assemble the ice on year month and date into an ice_on date column. Then do it for an ice_off column.
+
+```{r}
+lake_mendota1 <- lake_mendota %>% 
+  select(iceon_year, iceon_month, iceon_day, iceoff_year, iceoff_month, iceoff_day) %>% 
+  mutate(ice_on = make_date(iceon_year, iceon_month, iceon_day),
+         ice_off = make_date(iceoff_year, iceoff_month, iceoff_day))
+```
+
+
+### Create a new *duration* column by subtracting ice_on from ice_off. 
+
+```{r}
+lake_mendota2 <- lake_mendota1 %>% 
+  mutate(duration = as.numeric(ice_off - ice_on))
+lake_mendota2
+```
+
+
+### Make a line graph to show duration changed over iceoff_year. Use na.rm=TRUE. 
+
+```{r}
+ggplot(data = lake_mendota2) +
+  geom_line(mapping = aes(x = iceoff_year, y = duration), na.rm = TRUE)+
+  coord_cartesian(xlim = c(1850, 2030))
+```
+
+
+### Make appropriate labels.
+
+```{r}
+ggplot(data = lake_mendota2) +
+  geom_line(mapping = aes(x = iceoff_year, y = duration), na.rm = TRUE)+
+  coord_cartesian(xlim = c(1850, 2015)) +
+  labs(x = "Year", y = "Ice Duration (days)")
+```
+
+## Soil Carbon Dioxide
 
 
 
 
 
 
-
+## Mississippi River Discharge
 
 
 
