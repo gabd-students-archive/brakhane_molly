@@ -289,8 +289,63 @@ ggplot(data = soil2) +
 
 
 ## Mississippi River Discharge
+### Import and Wrangle
+```{r}
+library(tidyverse)
+library(dplyr)
+
+thebes <- read_csv("~/Masters/GABD/brakhane_molly/Data/thebes_discharge.csv")
+thebes
+colnames(thebes)
+thebes1 <- thebes %>%
+  gather ("1988", "1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003","2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", key = "Year", value = "discharge") %>% 
+  group_by(Year, Month) %>% 
+  mutate(discharge = discharge / 1000,
+         Event = case_when(
+           Year== "1993" ~ "Flood",
+           Year == "2011" ~ "Flood",
+           Year == "1988" ~ "Drought",
+           Year == "2012" ~ "Drought",
+           TRUE ~ "Normal"),
+         average_discharge = mean(discharge), na.rm = FALSE)
+thebes1
+```
+
+### Make a second data set
+
+```{r}
+events <- thebes1 %>% 
+  filter(Event %in% c("Flood", "Drought"))
+events
+```
 
 
+### Plot the data
+
+```{r}
+p1 <- thebes1 %>%
+  filter(!Year %in% c("1988", "1993", "2011", "2012")) %>%
+  ggplot() +
+  geom_line(aes(x = Month, y = average_discharge, group = Year),
+            color = "gray70",
+            size = 0.3) +
+  labs(x = NULL,
+       y = "Discharge (cf/s, thousands)")
+p1
+```
 
 
+### We will now add the second layer using the smaller data set., by using this code format. Mapping and grouping is the same as above, but add a color = Event argument to the aes() mapping function.
+
+```{r}
+thebes1 %>%
+  filter(!Year %in% c("1988", "1993", "2011", "2012")) %>%
+  ggplot() +
+  geom_line(aes(x = Month, y = average_discharge, group = Year),
+            color = "gray70",
+            size = 0.3) +
+  labs(x = NULL,
+       y = "Discharge (cf/s, thousands)") +
+  geom_line(data = events, aes(x = Month, y = average_discharge, group = Year, color = Event))
+```
 
