@@ -13,6 +13,10 @@ library(tidyverse)
 library(stringr)
 install.packages("htmlwidgets")
 library(htmlwidgets)
+install.packages("ggthemes")
+install.packages("RColorBrewer")
+install.packages("viridis")
+library(ggthemes)
 ```
 ```{r}
 ## 14.2.1
@@ -124,11 +128,163 @@ str_view(c("grey", "gray"), "gr(e|a)y")
 ### ?: 0 or 1
 ### +: 1 or more
 ### *: 0 or more
+
 x <- "1888 is the longest year in Roman numerals: MDCCCLXXXVIII"
 str_view(x, "CC?")
 str_view(x, "CC+")
 str_view(x, "C[LX]+")
+
+# Or you can specify the number exactly.
+### {n}: exactly n
+### {n,}: n or more
+### {,m}: at most, m
+### {n,m}: between n and m
+
+str_view(x, "C{2}")
+str_view(x, "C{2,}")
+str_view(x, "C{2,3}")
+
+# These look for the longest string, to find the shortest you add a ?
+str_view(x, "C{2,3}?")
+str_view(x, "C[LX]+?")
 ```
+```{r}
+## 14.3.5
+# Grouping within strings using PARANTHESES to capture a numbered group that matches what is within the parantheses, and it can be repeated by a \1
+fruit <- c("banana", "coconut", "cucumber", "jujube", "papaya", "salal berry")
+str_view(fruit, "(..)\\1", match = TRUE)
+### read as "find patterns in the fruit vector that are 2 of any letter that are repeated and match.
+```
+```{r}
+## 14.4.1
+# To see if a vector matches a pattern use str_detect
+x <- c("apple", "banana", "pear")
+str_detect(x, "e")
+
+# Sum and mean can be used across larger vectors.
+### How many common words start with T?
+sum(str_detect(words, "^t"))
+### What are the proportion of common words ending in a vowel?
+mean(str_detect(words, "[aeiou]$"))
+
+# Combine mutliple str_detect in complex logical conditions
+### Find all words containing at least one vowel and negate
+no_vowels_1 <- !str_detect(words, "[aeiou]")
+#### Find all words consisting only of consonants
+no_vowels_2 <- str_detect(words, "^[^aeiou]+$")
+identical(no_vowels_1, no_vowels_2)
+
+# Select the elements that match a pattern with logical subsetting.
+words[str_detect(words, "x$")]
+str_subset(words, "x$")
+
+# But you can usually use filter instead
+df <- tibble(
+  word = words,
+  i = seq_along(word)
+)
+df %>% 
+  filter(str_detect(word, "x$"))
+
+# To count the matches rather than confirming  or denying, use str_count
+x <- c("apple", "banana", "pear")
+str_count(x, "a")
+mean(str_count(words, "[aeiou]"))
+
+# Using str_count with mutate
+df %>% 
+  mutate(
+    vowels = str_count(word, "[aeiou]"),
+    consonants = str_count(word, "[^aeiou]")
+  )
+
+# Matches never overlap
+str_count("abababa", "aba")
+str_view_all("abababa", "aba")
+```
+```{r}
+## 14.4.2
+# To extract the text of a match, use str_extract()
+colours <- c("red", "orange", "yellow", "green", "blue", "purple")
+colour_match <- str_c(colours, collapse = "|")
+colour_match
+has_colour <- str_subset(sentences, colour_match)
+matches <- str_extract(has_colour, colour_match)
+head(matches)
+# Notice it only pulled out the first match! 
+more <- sentences[str_count(sentences, colour_match) > 1]
+str_view_all(more, colour_match)
+str_extract(more, colour_match)
+#But even simpler:
+str_extract_all(more, colour_match)
+# Simplify = True  will make a matrix w short matches expanded to the same length as the longest.
+str_extract_all(more, colour_match, simplify = TRUE)
+```
+```{r}
+## 14.4.3
+# Use parentheses to extract parts of a complex match. str_extract gives complete match, str_match gives individual components in a matrix
+noun <- "(a|the) ([^ ]+)"
+has_noun <- sentences %>% 
+  str_subset(noun) %>% 
+  head(10)
+has_noun %>% 
+  str_extract(noun)
+has_noun %>% 
+  str_match(noun)
+
+#If your data is in tibble it may be easier to use tidyr::extract
+tibble(sentence = sentences) %>% 
+  tidyr::extract(
+    sentence, c("article", "noun"), "(a|the) ([^ ])", 
+                remove = FALSE)
+```
+```{r}
+## 14.4.4
+# Replace matches with new strings
+x <- c("apple", "pear", "banana")
+str_replace(x, "[aeiou]", "-")
+str_replace_all(x, "[aeiou]", "-")
+
+#Instead of replacing, you can use back references to insert components of the match
+sentences %>% 
+  str_replace("([^ ]+) ([^ ]+) ([^ ]+)", "\\1 \\3 \\2") %>% 
+  head(5)
+```
+```{r}
+## 14.4.5
+# Use str_split() to split a string
+sentences %>% 
+  head(5) %>% 
+  str_split(" ")
+
+# Returning a list means it may be easiest to extract the first element
+"a|b|c|d" %>%
+  str_split("\\|") %>% 
+  .[[1]]
+
+# Using simplify = TRUE, it can return a matrix
+sentences %>% 
+  head(5) %>% 
+  str_split(" ", simplify = TRUE)
+  
+# Or a max number of pieces
+fields <- c("Name: Molly", "Country: US", "Age: 21")
+fields %>%  str_split(": ", n = 2, simplify = TRUE)
+
+# Or set a boundary to split.
+x <- "This is a sentence. This is another sentence."
+str_view_all(x, boundary("word"))
+str_split(x, " ")[[1]]
+str_split(x, boundary("word")) [[1]]
+```
+```{r}
+## 14.4.6
+# str_locate and str_locate_all give all of the starting and ending positions of each match, and str_sub extracts them.
+```
+
+
+
+
 
 
 
