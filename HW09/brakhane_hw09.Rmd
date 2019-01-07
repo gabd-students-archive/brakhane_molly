@@ -11,7 +11,6 @@ editor_options:
 ```{r}
 library(tidyverse)
 library(stringr)
-install.packages("htmlwidgets")
 library(htmlwidgets)
 install.packages("ggthemes")
 install.packages("RColorBrewer")
@@ -282,6 +281,21 @@ str_split(x, boundary("word")) [[1]]
 # str_locate and str_locate_all give all of the starting and ending positions of each match, and str_sub extracts them.
 ```
 
+# Part 1: DNA Strings
+### aka THANK YOU I NEED TO KNOW HOW TO DO THIS
+## Import data
+```{r}
+beta_gliadin_raw <- read_lines("~/Masters/GABD/brakhane_molly/Data/beta_gliadin.txt", skip = 1)
+beta_gliadin_raw
+```
+## Many strings to one
+```{r}
+beta_gliadin <- beta_gliadin_raw %>% 
+  str_replace_all("\\s", "\\") %>% 
+  str_replace_all("\\d", "\\") %>% 
+  str_c(collapse = "")
+beta_gliadin
+```
 
 
 
