@@ -293,8 +293,16 @@ beta_gliadin_raw
 beta_gliadin <- beta_gliadin_raw %>% 
   str_replace_all("\\s", "\\") %>% 
   str_replace_all("\\d", "\\") %>% 
-  str_c(collapse = "")
+  str_c(collapse = "") %>% 
+  str_to_upper()
 beta_gliadin
+str_length(beta_gliadin)
+```
+## Sequence analysis: Find the promoter region
+```{r}
+str_count(beta_gliadin, "^ACGT")
+str_count(beta_gliadin, "ATG")
+str_count(beta_gliadin, "TGA|TAA")
 ```
 
 
