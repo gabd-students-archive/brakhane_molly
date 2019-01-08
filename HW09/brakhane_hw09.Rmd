@@ -307,8 +307,19 @@ caat_box <- "CCAAT"
 tata_box <- "CTATAA"
 str_count(beta_gliadin, caat_box)
 str_count(beta_gliadin, tata_box)
-caat_seq <- "CCAAT...ATG"
+caat_seq <- "CCAAT.{100,150}ATG"
 str_count(beta_gliadin, caat_seq)
+tata_seq <- "CTATAA.{50,100}ATG"
+str_count(beta_gliadin, tata_seq)
+caat_seqs_all <- str_extract_all(beta_gliadin, caat_seq, simplify = TRUE)
+caat_seqs_all
+str_length(caat_seqs_all)
+str_which(caat_seqs_all, tata_box)
+promoter <- str_subset(caat_seqs_all, tata_box)
+```
+```{r}
+promoter
+str_length(promoter)
 ```
 
 
@@ -326,9 +337,8 @@ ants_raw
 ```
 ## Wrangle Data
 ```{r}
-spec <- ""
 ants <- ants_raw %>% 
-  gather(key = species, value = abundance, matches(regex, ignore.case = FALSE))
+  gather(key = species, value = abundance, matches(, ignore.case = FALSE))
 ```
 
 
