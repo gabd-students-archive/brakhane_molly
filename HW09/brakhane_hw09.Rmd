@@ -303,6 +303,12 @@ str_length(beta_gliadin)
 str_count(beta_gliadin, "^ACGT")
 str_count(beta_gliadin, "ATG")
 str_count(beta_gliadin, "TGA|TAA")
+caat_box <- "CCAAT"
+tata_box <- "CTATAA"
+str_count(beta_gliadin, caat_box)
+str_count(beta_gliadin, tata_box)
+caat_seq <- "CCAAT...ATG"
+str_count(beta_gliadin, caat_seq)
 ```
 
 
@@ -312,6 +318,18 @@ str_count(beta_gliadin, "TGA|TAA")
 
 
 
+# Part 2: Ants
+## Import the data
+```{r}
+ants_raw <- read.csv("~/Masters/GABD/brakhane_molly/Data/ants.csv")
+ants_raw
+```
+## Wrangle Data
+```{r}
+spec <- ""
+ants <- ants_raw %>% 
+  gather(key = species, value = abundance, matches(regex, ignore.case = FALSE))
+```
 
 
 
@@ -319,13 +337,77 @@ str_count(beta_gliadin, "TGA|TAA")
 
 
 
+# Part 3: Featuring Phlox Flowers
+## Import and Wrangle Data first data set
+```{r}
+?replace
+flowers_size_raw <- read.csv("~/Masters/GABD/brakhane_molly/Data/flower_size.csv")
+flowers_size_raw
+flower_size <- flowers_size_raw %>% 
+  filter(!is.na(Flower.number)) %>%
+  select(species = Species, cor_length = Corolla.length..cm., throat_width = Corolla.width.throat..cm.) %>% 
+  separate(species, into = c("genus", "species")) %>%
+  mutate(species = str_replace(species, "pinnatfida", "pinnatifida")) %>%
+  group_by(genus, species) 
+ flower_size 
 
-
-
-
-
-
-
-
-
+summary_flower_size <- flower_size %>% 
+   summarise(
+      mean_length = mean(cor_length),
+      mean_width = mean(throat_width),
+      max_length = max(cor_length),
+      max_width = max(throat_width))
+summary_flower_size
+```
+## Import and wrangle second data set
+```{r}
+pollinators_raw <- read.csv("~/Masters/GABD/brakhane_molly/Data/flower_pollinators.csv", na.strings = c("", "NA"))
+pollinators_raw
+pollinators <- pollinators_raw %>%  
+  filter(!is.na(Pollinator)) %>%
+  select(-c(Color, starts_with("Source"))) %>%
+  separate(ï..Species, into = c("genus", "species")) %>% 
+  separate(Pollinator, into = "Syndrome", sep = " |, ")
+pollinators
+```
+## Join the Datasets
+```{r}
+phlox <- inner_join(summary_flower_size, pollinators, by = c("genus", "species"))
+phlox
+```
+## Plotting
+```{r}
+new_phlox <- phlox %>% 
+  mutate(
+    Syndrome = str_replace(Syndrome, "bee$", "bees"),
+    Syndrome = str_replace(Syndrome, "beetle$", "beetles"))
+new_phlox
+    
+ggplot(data = new_phlox) +
+  geom_point(mapping = aes(x = mean_length, y = mean_width, color = Syndrome))
+```
+```{r}
+new_phlox %>% 
+  group_by(Syndrome) %>% 
+  count(Syndrome)
+phlox_a <- new_phlox %>% 
+  mutate(
+    Syndrome = str_replace(Syndrome, "beetles|flies", "other insects")
+  )
+ggplot(data = phlox_a) +
+  geom_point(mapping = aes(x = mean_length, y = mean_width, color = Syndrome))
+```
+```{r}
+phlox_b <- phlox_a %>% 
+  mutate(
+    syndrome_group = case_when(
+      Syndrome == "hummingbird" ~ "Bird",
+      Syndrome == "bat" ~ "Mammal",
+      Syndrome == "autogamous" ~ "Autogamous",
+      TRUE ~ "Insect"
+    )
+  )
+ggplot(data = phlox_b) +
+  geom_point(mapping = aes(x = mean_length, y = mean_width, color = syndrome_group))
+```
 
