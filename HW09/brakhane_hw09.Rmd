@@ -12,9 +12,6 @@ editor_options:
 library(tidyverse)
 library(stringr)
 library(htmlwidgets)
-install.packages("ggthemes")
-install.packages("RColorBrewer")
-install.packages("viridis")
 library(ggthemes)
 ```
 ```{r}
@@ -362,12 +359,6 @@ ggplot(data = ants_new, aes(x = reorder(species, total), y = total, group = spec
   
 ```
 
-
-
-
-
-
-
 # Part 3: Featuring Phlox Flowers
 ## Import and Wrangle Data first data set
 ```{r}
@@ -440,5 +431,31 @@ phlox_b <- phlox_a %>%
   )
 ggplot(data = phlox_b) +
   geom_point(mapping = aes(x = mean_length, y = mean_width, color = syndrome_group))
+```
+
+# Part 4: customize your plots
+```{r}
+p1 <- ggplot(data = phlox_b) +
+  geom_point(mapping = aes(x = max_width, y = max_length, color = syndrome_group))
+  
+```
+
+```{r}
+# Plot 1 - I think this one is the easiest to differentiate because it is primary colors
+library(ggsci)
+p1 + scale_color_tron()
+```
+```{r}
+# Plot 2
+p1 + scale_color_futurama(c("planetexpress"))
+
+```
+```{r}
+# Plot 3
+p1 + scale_color_nejm()
+```
+```{r}
+# Plot 4 - UGLY
+p1 + scale_color_pander()
 ```
 
