@@ -332,9 +332,34 @@ ants_raw
 ```{r}
 library(stringr)
 ants <- ants_raw %>% 
-  select(-c(season)) %>% 
+  select(-c(season, seas.code, trt, plot, sample)) %>% 
   gather(key = species, value = abundance, matches("\\w\\.\\w", ignore.case = FALSE))
 ants
+```
+```{r}
+# the HARDEST part
+ants_new <- ants %>% 
+  mutate(
+    species = str_replace(
+      species,
+      pattern = "(^[A-Z]*\\w{3})\\w{3,}\\.(\\w{4})\\w{2,}",
+      replacement = "\\1\\2"),
+    year = factor(year, levels = c("2010", "2011"), labels = c("2010", "2011"), ordered = TRUE)) %>% 
+  group_by(year, species) %>% 
+  summarise(total = sum(abundance, na.rm = TRUE)
+  )
+ants_new
+
+```
+## Plot the data
+```{r}
+ggplot(data = ants_new, aes(x = reorder(species, total), y = total, group = species)) + 
+  geom_line(color = "gray") +
+  geom_point( aes(shape = year), size = 2) +
+  coord_flip() +
+  labs(y = "Total Abundance", x = NULL, shape = "Year") +
+  theme_minimal()
+  
 ```
 
 
