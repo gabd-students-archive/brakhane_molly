@@ -10,14 +10,13 @@ editor_options:
 ```{r}
 library(tidyverse)
 library(knitr)
-install.packages("smatr")
 library(smatr)
 ```
 
 
 # Darters in Riffles
 ```{r}
-read.delim("data/darter.txt")
+read.delim("~/Masters/GABD/brakhane_molly/Data/darter.txt")
 ```
 
 
@@ -26,7 +25,7 @@ read.delim("data/darter.txt")
 start_pos <- c(1, 4, 15, 16, 17, 18, 21, 25, 29, 33, 36, 39, 40)
 stop_pos <- c(3, 14, 15, 16, 17, 20, 24, 28, 32, 35, 38, 40, 41)
 names <- c("Specimen ID", "Species", "Riffle", "Age", "Sex", "Length", "Depth", "Velocity", "Temperature", "MajSub", "MinSub", "MajType", "MinType")
-darters <- read.fwf("data/darter.txt", skip = 15, widths = c(3, 11, 1, 1, 1, 3, 4, 3, 3, 2, 2, 1, 1),, col.names = names)
+darters <- read.fwf("~/Masters/GABD/brakhane_molly/Data/darter.txt", skip = 15, widths = c(3, 11, 1, 1, 1, 3, 4, 3, 3, 2, 2, 1, 1), col.names = names)
 darters
 ```
 ## Wrangle Data
@@ -35,7 +34,7 @@ darters
 darters_b <- filter(darters, !Species %in% c("tetrazonum", "zonale"))
 darters_c <- mutate(darters_b,
   total_substrate = MajSub + MinSub,
-         Length = Length * 100,
+         Length = Length * 10,
          Riffle = recode(Riffle, "1" = "Riffle 1", "2" = "Riffle 2"),
          Sex = recode(Sex, "m" = "Male", "f" = "Female"),
   )
@@ -45,9 +44,9 @@ darters_c
 ```{r}
 summary_darter <- darters_c %>% 
   group_by(Riffle, Species) %>% 
-  summarise(average_length = mean(Length),
-            average_depth = mean(Depth),
-            average_velocity = mean(Velocity))
+  summarise(average_length = mean(Length, na.rm = TRUE),
+            average_depth = mean(Depth, na.rm = TRUE),
+            average_velocity = mean(Velocity, na.rm = TRUE))
 summary_darter
 ```
 ## Table Results
@@ -60,12 +59,16 @@ ggplot(data = summary_darter) +
 ## Plot 1
 ```{r}
 ggplot(data = darters_c) +
-  stat_summary(mapping = aes(x = Species, y = Length)) +
+  stat_summary(mapping = aes(x = Species, y = Length),
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median
+  ) +
   geom_point(data = summary_darter, 
              mapping = aes(x = Species, y = average_length), shape = 22, fill = "black")+
   coord_flip() +
   facet_wrap(~Riffle, nrow = 2) +
-  labs(y = "Length(mm)", x = NULL)
+  labs(y = "Length (mm)", x = NULL)
 ```
 Riffle 2 has a much larger distribution of sizes than Riffle 1.
 ## Plot 2
@@ -96,21 +99,23 @@ The average is odd compared to the data sets. I must have messed up but I don't 
 ```{r}
 library(tidyverse)
 library(smatr)
+library(knitr)
 library(dplyr)
+names <- c("capture_date", "day", "site", "urban_score", "cortF", "cortB", "sex", "smi", "tarsus", "mass", "basal_cort", "stress_cort")
+feathers <- read.csv("~/Masters/GABD/brakhane_molly/Data/feathers.csv", dec = ",")
+# I cannor get locale = locale(decimal_mark = ",") to work for the life of me. I could get dec = "," to work. And I could get the file imported with the correct decimal mark two different ways, just not with locale
+feathers <- feathers %>% 
+  `colnames<-`(names)
 feathers
 ```
 /crying
-```{r}
-feathers_a <- rename(feathers, c("ï..Capture.Date" = "capture_date", "Date" = "day", "Site" = "site", "Urba.Score" = "urban_score", "CortF.ng.mg" = "cortf", "CortF.ng.mm" = "cortB", "Sex" = "sex", "SMI" = "smi", "Tarsus" = "tarsus", "Mass" = "mass", "Bas_Cort" = "basal_cort", "Stress_Cort" = "stress_cort"))
-feathers_a
-```
 ## Wrangle Data
 ```{r}
-mean_tarsus <- mean(feathers_a$tarsus)
+mean_tarsus <- mean(feathers$tarsus, na.rm = TRUE)
 
 ```
 ```{r}
-feathers_b <-  mutate(feathers_a, log_mass = log(mass), log_tarsus = log(tarsus))
+feathers_b <-  mutate(feathers, log_mass = log(mass), log_tarsus = log(tarsus))
 ```
 
 ```{r}
@@ -120,9 +125,10 @@ summary(major_axis)
 coef(major_axis)
 ```
 ```{r}
-feathers_smi<- feathers_a %>% 
+b <- coef(major_axis)["slope"]
+feathers_smi<- feathers %>% 
   mutate(
-    new_smi = mass * (mean_tarsus/tarsus)^1.86)
+    new_smi = mass * (mean_tarsus/tarsus)^b)
 feathers_smi %>% 
   select(smi, new_smi)
 feathers_smi
@@ -133,7 +139,7 @@ feathers_smi
 summary_feathers <- feathers_smi %>% 
   group_by(site) %>% 
   summarize(average_basal = mean(basal_cort, na.rm = TRUE),
-            se_basal = sd(basal_cort, na.rm = TRUE) / sqrt(NROW(feathers_smi)))
+            se_basal = sd(basal_cort, na.rm = TRUE) / sqrt(n()))
 summary_feathers
 
 ```
@@ -146,16 +152,10 @@ ggplot(data = feathers_smi) +
 ```
 
 *Plot 2*
-```{r}
-?geom_errorbar()
-edit_summary <- summary_feathers %>% 
- mutate(ymin = average_basal - se_basal,
-        ymax = average_basal + se_basal) 
-```
 ```{R}
 ggplot() +
   geom_point(data = feathers_smi, aes(x = site, y = basal_cort)) +
-  geom_errorbar(data = edit_summary, aes(x = site, ymin = ymin, ymax = ymax))
+  geom_errorbar(data = summary_feathers, aes(x = site, ymin = average_basal - se_basal, ymax =  average_basal + se_basal))
 ```
  
 *Plot 3*
@@ -164,12 +164,10 @@ stress_summary <- feathers_smi %>%
   group_by(site) %>% 
   mutate(
     avg_stress = mean(stress_cort, na.rm = TRUE),
-    se_cort = sd(stress_cort, na.rm = TRUE)/sqrt(NROW(feathers_smi)),
-    ymin = avg_stress - se_cort,
-    ymax = avg_stress + se_cort)
+    se_cort = sd(stress_cort, na.rm = TRUE)/sqrt(NROW(feathers_smi)))
 ggplot() +
   geom_point(data = feathers_smi, aes(x = site, y = stress_cort)) +
-  geom_linerange(data = stress_summary, aes(x = site, ymin = ymin, ymax = ymax))
+  geom_linerange(data = stress_summary, aes(x = site, ymin = avg_stress - se_cort, ymax = avg_stress + se_cort))
 ```
 
 ## Graduate and Honors Students
