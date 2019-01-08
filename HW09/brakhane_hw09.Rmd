@@ -322,13 +322,6 @@ promoter
 str_length(promoter)
 ```
 
-
-
-
-
-
-
-
 # Part 2: Ants
 ## Import the data
 ```{r}
@@ -337,8 +330,11 @@ ants_raw
 ```
 ## Wrangle Data
 ```{r}
+library(stringr)
 ants <- ants_raw %>% 
-  gather(key = species, value = abundance, matches(, ignore.case = FALSE))
+  select(-c(season)) %>% 
+  gather(key = species, value = abundance, matches("\\w\\.\\w", ignore.case = FALSE))
+ants
 ```
 
 
