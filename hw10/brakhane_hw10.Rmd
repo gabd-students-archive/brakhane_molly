@@ -178,6 +178,44 @@ base_map +
   geom_point(data = earthquakes, aes(x = long, y = lat, size = mag), alpha = 0.4) +
   scale_size_continuous(range = c(0.5, 3), name = "Magnitude")
 ```
+## My turn!
+```{r}
+min_long <- -90
+max_long <- -58
+min_lat <- 8
+max_lat <- 28
+```
+```{r}
+blennies <- read_csv("~/Masters/GABD/brakhane_molly/Data/blennies.csv")
+```
+```{r}
+carib_sea <- getNOAA.bathy(lon1= min_long,
+                      lon2= max_long,
+                      lat1 = min_lat, 
+                      lat2 = max_lat,
+                      antimeridian = FALSE,
+                      keep = TRUE)
+```
+```{r}
+base_map <- autoplot.bathy(carib_sea,
+               geom = c("raster", "contour"),
+               size = 0.1,
+               na.rm = TRUE) +
+  scale_fill_etopo(guide = FALSE) +
+  labs(x = "Longitude", y = "Latitude")
+```
+```{r}
+blennies
+
+base_map + 
+  geom_point(data = blennies,
+             aes(x = long, 
+                 y = lat, 
+                 shape = name), 
+              fill = "white", size = 3) +
+  scale_shape_manual(values = c(21,22,23), name = "Species") +
+  theme(legend.position = "bottom", legend.title = element_text(face = "italic"))
+```
 
 
 
