@@ -123,6 +123,41 @@ base = get_stamenmap(bbox = c(min_long,
                              max_lat),
                      zoom = 4,
                      maptype = "terrain-background")
+ggmap(base)
+```
+```{r}
+base <- ggmap(base)
+base + geom_point(data = bigfoot, aes(x = long, y = lat))
+```
+```{r}
+base + geom_point(data = bears, aes(x = long, y = lat))
+```
+```{r}
+base + geom_point(data = both_species,
+                  aes(x = long, y = lat,
+                      shape = name, fill = name),
+                  size = 2) +
+  scale_shape_manual(values = c(22:23)) +
+  labs(x = "Longitude", y = "Latitude", fill = "Species", shape = "Species")
+```
+## My turn!
+```{r}
+set.seed(1882667)
+bigfoot <- read_csv("~/Masters/GABD/brakhane_molly/Data/bigfoot.csv")
+bigfoot <- filter(bigfoot, 
+                  long >= min_long & long <= max_long,
+                  lat >= min_lat & lat <= max_lat) %>% 
+  sample_n(300) %>% 
+  mutate(name = "Gigantopithecus") %>% 
+  select(name, long, lat)
+bears <- read_csv("~/Masters/GABD/brakhane_molly/Data/bears.csv")
+both_species <- bind_rows(bears, bigfoot)
+base + geom_point(data = both_species,
+                  aes(x = long, y = lat,
+                      shape = name, fill = name),
+                  size = 2) +
+  scale_shape_manual(values = c(22:23)) +
+  labs(x = "Longitude", y = "Latitude", fill = "Species", shape = "Species")
 ```
 
 
@@ -136,7 +171,7 @@ base = get_stamenmap(bbox = c(min_long,
 
 
 
-# Part 3
+# Part 3: Bathemetry
 ```{r}
 min_long <- -170
 max_long <- 164
